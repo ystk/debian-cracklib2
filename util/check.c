@@ -22,7 +22,10 @@ main(int argc, char **argv)
 	int i;
 
 	setlocale(LC_ALL, "");
+
+#ifdef ENABLE_NLS
 	textdomain(PACKAGE);
+#endif
 
 	while (fgets(buf, sizeof(buf), stdin) != NULL) {
 		while (((i = strlen(buf)) > 0) && (i > 0)) {

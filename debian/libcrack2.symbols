@@ -27,3 +27,4 @@ libcrack.so.2 libcrack2 #MINVER#
  Trim@Base 2.8.12
  Uppercase@Base 2.8.12
  GetDefaultCracklibDict@Base 2.8.14
+ __DEBIAN_SPECIFIC__SafeFascistCheck@Base 2.8.19-2~

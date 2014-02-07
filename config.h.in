@@ -4,6 +4,14 @@
    language is requested. */
 #undef ENABLE_NLS
 
+/* Define to 1 if you have the MacOS X function CFLocaleCopyCurrent in the
+   CoreFoundation framework. */
+#undef HAVE_CFLOCALECOPYCURRENT
+
+/* Define to 1 if you have the MacOS X function CFPreferencesCopyAppValue in
+   the CoreFoundation framework. */
+#undef HAVE_CFPREFERENCESCOPYAPPVALUE
+
 /* Define if the GNU dcgettext() function is already present or preinstalled.
    */
 #undef HAVE_DCGETTEXT
@@ -20,7 +28,7 @@
 /* Define if the GNU gettext() function is already present or preinstalled. */
 #undef HAVE_GETTEXT
 
-/* Define if you have the iconv() function. */
+/* Define if you have the iconv() function and it works. */
 #undef HAVE_ICONV
 
 /* Define to 1 if you have the <inttypes.h> header file. */
@@ -59,6 +67,10 @@
 /* Define to 1 if you have the <zlib.h> header file. */
 #undef HAVE_ZLIB_H
 
+/* Define to the sub-directory in which libtool stores uninstalled libraries.
+   */
+#undef LT_OBJDIR
+
 /* Name of package */
 #undef PACKAGE
 
@@ -73,6 +85,9 @@
 
 /* Define to the one symbol short name of this package. */
 #undef PACKAGE_TARNAME
+
+/* Define to the home page for this package. */
+#undef PACKAGE_URL
 
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION

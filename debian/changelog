@@ -1,3 +1,111 @@
+cracklib2 (2.8.19-3) unstable; urgency=low
+
+  * update debian/patches/libcrack2-error-safer-check-variant.patch with
+    fixed version from http://bugs.debian.org/cgi-
+    bin/bugreport.cgi?bug=689588#29
+
+ -- Jan Dittberner <jandd@debian.org>  Wed, 12 Dec 2012 22:56:46 +0100
+
+cracklib2 (2.8.19-2) unstable; urgency=low
+
+  * add debian/patches/libcrack2-error-safer-check-variant.patch to provide
+    __DEBIAN_SPECIFIC__SafeFascistCheck that does not call exit (Closes:
+    #682735)
+  * add __DEBIAN_SPECIFIC__SafeFascistCheck to debian/libcrack2.symbols
+
+ -- Jan Dittberner <jandd@debian.org>  Tue, 02 Oct 2012 09:15:16 +0200
+
+cracklib2 (2.8.19-1) unstable; urgency=low
+
+  * New upstream version
+  * remove debian/patches/top-500-worst-passwords.patch, applied
+    upstream
+  * add autotools-dev to Build-Depends
+  * debian/rules:
+    - use aclocal, libtoolize, automake and autoreconf instead of autogen.sh
+    - do not remove config.h.in
+    - add autotools_dev to dh --with options
+    - build in debian/buildtmp/{base,pythonX.Y}
+    - build and install Python code using setup.py
+    - run Python tests
+  * enable hardening build flags
+    - add dpkg-dev (>= 1.16.1~) to Build-Depends
+    - add DPKG_EXPORT_BUILDFLAGS=1 and include
+      /usr/share/dpkg/buildflags.mk in debian/rules
+  * remove debian/tmp/* from debian/cracklib-runtime.install, remove
+    debian/libcrack2-dev.install, remove debian/libcrack2.install
+  * add debian/test_cracklib.py with unit tests (missing in upstream
+    tarball)
+  * add debian/patches/install-debian-python-modules.patch to install
+    debian/test_cracklib.py and debian/crack.py
+  * add debian/patches/pass-dict-to-cracklib-test.patch to allow running
+    Python tests using a specific dictionary
+  * add Python3 support
+    - debian/control:
+      - add new binary package python3-cracklib
+      - add python3-all-dev (>= 3.1.3-2~) and python3-setuptools to
+        Build-Depends
+    - debian/rules:
+      - add python3 to dh --with options
+      - add override_dh_python2 and override_dh_python3 to run
+        dh_python2 for python-cracklib and dh_python3 for python3-cracklib
+        only
+      - define PY3VERS and use it for configuring, building, testing and
+        installing python3-cracklib
+
+ -- Jan Dittberner <jandd@debian.org>  Sun, 20 May 2012 01:24:02 +0200
+
+cracklib2 (2.8.18-4) unstable; urgency=low
+
+  [ Fabian Greffrath ]
+  * Extend the tiny example wordlist included with the cracklib package
+    itself with the words from the list of "The Top 500 Worst Passwords
+    of All Time" [1], modulo the ones that fail the regular cracklib tests
+    anyway (Closes: 657464).
+    [1] <http://www.whatsmypass.com/the-top-500-worst-passwords-of-all-time>
+  * Move the /usr/share/cracklib/cracklib-small wordlist file from the
+    libcrack2 to the cracklib-runtime package and install it into
+    /usr/share/dict. So there will always be at least the tiny example
+    wordlist to compile a database from, even if no other package providing
+    a wordlist (though recommended) is installed.
+  * Do not install the /usr/share/cracklib/cracklib.magic file anymore.
+    It was installed in the wrong location anyway and the file(1) tool
+    is able to independently detect cracklib databases since at least 2005.
+  * Remove config.h.in in the clean rule in debian/rules,
+    fixes FTBFS twice in a row.
+
+  [ Jan Dittberner ]
+  * update patch debian/patches/top-500-worst-passwords.patch to add
+    additional words suggested by Fabian to dicts/cracklib-small
+
+ -- Jan Dittberner <jandd@debian.org>  Fri, 27 Jan 2012 15:38:32 +0100
+
+cracklib2 (2.8.18-3) unstable; urgency=low
+
+  * switch from python-support to dh_python2
+    - remove python-support and python-all from Build-Depends
+    - remove XS-Python-Version, remove XB-Python-Version from
+      python-cracklib stanza
+    - add --with python2 to dh invocation
+    - bump minimum required python-all-dev version to 2.6.6-3~
+  * bump Standards-Version to 3.9.2 (no changes needed)
+
+ -- Jan Dittberner <jandd@debian.org>  Sat, 11 Jun 2011 22:29:23 +0200
+
+cracklib2 (2.8.18-2) unstable; urgency=low
+
+  * upload to unstable
+
+ -- Jan Dittberner <jandd@debian.org>  Sun, 06 Feb 2011 13:06:26 +0100
+
+cracklib2 (2.8.18-1) experimental; urgency=low
+
+  * New upstream version.
+  * remove debian/patches/596281-fix-python-extension-segfault.patch and
+    debian/patches/series, patch has been applied upstream
+
+ -- Jan Dittberner <jandd@debian.org>  Thu, 30 Sep 2010 19:43:41 +0200
+
 cracklib2 (2.8.16-4) unstable; urgency=low
 
   * debian/control: remove Conflicts, Provides and Breaks refering to versions
@@ -472,7 +580,7 @@ cracklib2 (2.7-16) unstable; urgency=high
 
 cracklib2 (2.7-15) unstable; urgency=high
 
-  * Added missing "Depends: ${shlibs:Depends}" to cracklib-runtime. Thanks to 
+  * Added missing "Depends: ${shlibs:Depends}" to cracklib-runtime. Thanks to
     Maks Attems for discovering this. (closes: #280668)
   * Urgency high since this is an RC bug and no code changes were made.
 
