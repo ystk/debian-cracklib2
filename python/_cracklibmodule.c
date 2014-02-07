@@ -4,7 +4,7 @@
  * Parts of this code are based on work Copyright (c) 2003 by Domenico
  * Andreoli.
  *
- * Copyright (c) 2008, 2009 Jan Dittberner <jan@dittberner.info>
+ * Copyright (c) 2008, 2009, 2012 Jan Dittberner <jan@dittberner.info>
  *
  * This file is part of cracklib.
  *
@@ -28,12 +28,20 @@
 #else
 #include <Python.h>
 #endif
+#if PY_MAJOR_VERSION >= 3
+#define IS_PY3K
+#endif
 #ifdef HAVE_PTHREAD_H
 #include <pthread.h>
 #endif
+#ifdef HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
 #include <crack.h>
 #include <locale.h>
+#ifdef HAVE_LIBINTL_H
 #include <libintl.h>
+#endif
 
 #ifdef HAVE_PTHREAD_H
 static pthread_mutex_t cracklib_mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -64,7 +72,8 @@ static char _cracklib_FascistCheck_doc [] =
 static PyObject *
 _cracklib_FascistCheck(PyObject *self, PyObject *args, PyObject *kwargs)
 {
-    char *candidate, *dict, *defaultdict;
+    char *candidate, *dict;
+    char *defaultdict = NULL;
     const char *result;
     struct stat st;
     char *keywords[] = {"pw", "dictpath", NULL};
@@ -134,7 +143,9 @@ _cracklib_FascistCheck(PyObject *self, PyObject *args, PyObject *kwargs)
     }
 
 	setlocale(LC_ALL, "");
+#ifdef ENABLE_NLS
 	textdomain("cracklib");
+#endif
 
     LOCK();
     result = FascistCheck(candidate, dict ? dict : defaultdict);
@@ -168,8 +179,40 @@ static char _cracklib_doc[] =
     "program or interpreter.\n"
 ;
 
+#ifdef IS_PY3K
+
+static struct PyModuleDef moduledef = {
+    PyModuleDef_HEAD_INIT,
+    "_cracklib",
+    _cracklib_doc,
+    0,
+    _cracklibmethods,
+    NULL,
+    NULL,
+    NULL,
+    NULL
+};
+
+#define INITERROR return NULL
+
+PyObject *
+PyInit__cracklib(void)
+
+#else
+#define INITERROR return
+
 void
 init_cracklib(void)
+#endif
 {
-    Py_InitModule3("_cracklib", _cracklibmethods, _cracklib_doc);
+#ifdef IS_PY3K
+    PyObject *module = PyModule_Create(&moduledef);
+#else
+    PyObject *module = Py_InitModule3("_cracklib", _cracklibmethods, _cracklib_doc);
+#endif
+    if (module == NULL)
+        INITERROR;
+#ifdef IS_PY3K
+    return module;
+#endif
 }
