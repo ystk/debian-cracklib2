@@ -34,14 +34,15 @@ struct pi_header64
 
 typedef struct
 {
-    FILE *ifp;
-    FILE *dfp;
-    FILE *wfp;
+    void *ifp;
+    void *dfp;
+    void *wfp;
     uint64_t flags;
     uint64_t hwms[256];
     struct pi_header64 header;
     int count;
-    char data[NUMWORDS][MAXWORDLEN];
+    char data_put[NUMWORDS][MAXWORDLEN];
+    char data_get[NUMWORDS][MAXWORDLEN];
 } PWDICT64;
 
 
@@ -71,14 +72,14 @@ PWOpen(prefix, mode)
     char iname[STRINGSIZE];
     char dname[STRINGSIZE];
     char wname[STRINGSIZE];
-    FILE *dfp;
-    FILE *ifp;
-    FILE *wfp;
+    void *dfp;
+    void *ifp;
+    void *wfp;
 
     if (pdesc.header.pih_magic == PIH_MAGIC)
     {
 	fprintf(stderr, "%s: another dictionary already open\n", prefix);
-	return ((PWDICT *) 0);
+	return NULL;
     }
 
     memset(&pdesc, '\0', sizeof(pdesc));
@@ -101,11 +102,11 @@ PWOpen(prefix, mode)
 			if (!(pdesc.dfp = gzopen(dname, mode)))
 			{
 				perror(dname);
-				return ((PWDICT *) 0);
+				return NULL;
 			}
 #else
 		perror(dname);
-		return ((PWDICT *) 0);
+		return NULL;
 #endif
 		}
 	}
@@ -116,20 +117,20 @@ PWOpen(prefix, mode)
 		if (!(pdesc.dfp = fopen(dname, mode)))
 		{
 			perror(dname);
-			return ((PWDICT *) 0);
+			return NULL;
 		}
 	}
 
     if (!(pdesc.ifp = fopen(iname, mode)))
     {
 #ifdef HAVE_ZLIB_H
-		if(pdesc.flags & PFOR_USEZLIB)
+		if (pdesc.flags & PFOR_USEZLIB)
 			gzclose(pdesc.dfp);
 		else
 #endif
 			fclose(pdesc.dfp);
 	perror(iname);
-	return ((PWDICT *) 0);
+	return NULL;
     }
 
     if ((pdesc.wfp = fopen(wname, mode)))
@@ -160,16 +161,16 @@ PWOpen(prefix, mode)
 	    pdesc.header.pih_magic = 0;
 	    fclose(ifp);
 #ifdef HAVE_ZLIB_H
-		if(pdesc.flags & PFOR_USEZLIB)
+		if (pdesc.flags & PFOR_USEZLIB)
 			gzclose(dfp);
 		else
 #endif
 			fclose(dfp);
-	    if(wfp)
+	    if (wfp)
 	    {
 		fclose(wfp);
 	    }
-	    return ((PWDICT *) 0);
+	    return NULL;
 	}
 
         if ((pdesc.header.pih_magic == 0) || (pdesc.header.pih_numwords == 0))
@@ -179,40 +180,40 @@ PWOpen(prefix, mode)
             if (!fread((char *) &pdesc64.header, sizeof(pdesc64.header), 1, ifp))
             {
                 fprintf(stderr, "%s: error reading header\n", prefix);
- 
+
                 pdesc.header.pih_magic = 0;
                 fclose(ifp);
 #ifdef HAVE_ZLIB_H
-				if(pdesc.flags & PFOR_USEZLIB)
+				if (pdesc.flags & PFOR_USEZLIB)
 					gzclose(dfp);
 				else
 #endif
 					fclose(dfp);
-		if(wfp)
+		if (wfp)
 		{
 			fclose(wfp);
 		}
-                return ((PWDICT *) 0);
+                return NULL;
             }
             if (pdesc64.header.pih_magic != PIH_MAGIC)
             {
                 /* nope, not "64-bit" after all */
                 fprintf(stderr, "%s: error reading header\n", prefix);
- 
+
                 pdesc.header.pih_magic = 0;
                 fclose(ifp);
 #ifdef HAVE_ZLIB_H
-				if(pdesc.flags & PFOR_USEZLIB)
+				if (pdesc.flags & PFOR_USEZLIB)
 					gzclose(dfp);
 				else
 #endif
 					fclose(dfp);
 
-		if(wfp)
+		if (wfp)
 		{
 			fclose(wfp);
 		}
-                return ((PWDICT *) 0);
+                return NULL;
             }
             pdesc.header.pih_magic = pdesc64.header.pih_magic;
             pdesc.header.pih_numwords = pdesc64.header.pih_numwords;
@@ -228,36 +229,36 @@ PWOpen(prefix, mode)
 	    pdesc.header.pih_magic = 0;
 	    fclose(ifp);
 #ifdef HAVE_ZLIB_H
-		if(pdesc.flags & PFOR_USEZLIB)
+		if (pdesc.flags & PFOR_USEZLIB)
 			gzclose(dfp);
 		else
 #endif
 			fclose(dfp);
 
-	    if(wfp)
+	    if (wfp)
 	    {
 		fclose(wfp);
 	    }
-	    return ((PWDICT *) 0);
+	    return NULL;
 	}
 
         if (pdesc.header.pih_numwords < 1)
         {
             fprintf(stderr, "%s: invalid word count\n", prefix);
- 
+
             pdesc.header.pih_magic = 0;
             fclose(ifp);
 #ifdef HAVE_ZLIB_H
-			if(pdesc.flags & PFOR_USEZLIB)
+			if (pdesc.flags & PFOR_USEZLIB)
 				gzclose(dfp);
 			else
 #endif
 				fclose(dfp);
-	    if(wfp)
+	    if (wfp)
 	    {
 		fclose(wfp);
 	    }
-            return ((PWDICT *) 0);
+            return NULL;
         }
 
 	if (pdesc.header.pih_blocklen != NUMWORDS)
@@ -267,16 +268,16 @@ PWOpen(prefix, mode)
 	    pdesc.header.pih_magic = 0;
 	    fclose(ifp);
 #ifdef HAVE_ZLIB_H
-		if(pdesc.flags & PFOR_USEZLIB)
+		if (pdesc.flags & PFOR_USEZLIB)
 			gzclose(dfp);
 		else
 #endif
 			fclose(dfp);
-		if(wfp)
+		if (wfp)
 	    {
 		fclose(wfp);
 	    }
-	    return ((PWDICT *) 0);
+	    return NULL;
 	}
 
 	if (pdesc.flags & PFOR_USEHWMS)
@@ -293,7 +294,7 @@ PWOpen(prefix, mode)
                 {
                     pdesc.hwms[i] = pdesc64.hwms[i];
                 }
-            } 
+            }
             else if (fread(pdesc.hwms, 1, sizeof(pdesc.hwms), wfp) != sizeof(pdesc.hwms))
 	    {
 		pdesc.flags &= ~PFOR_USEHWMS;
@@ -323,7 +324,7 @@ PWClose(pwp)
     if (pwp->flags & PFOR_WRITE)
     {
 	pwp->flags |= PFOR_FLUSH;
-	PutPW(pwp, (char *) 0);	/* flush last index if necess */
+	PutPW(pwp, NULL);	/* flush last index if necess */
 
 	if (fseek(pwp->ifp, 0L, 0))
 	{
@@ -356,12 +357,12 @@ PWClose(pwp)
 
     fclose(pwp->ifp);
 #ifdef HAVE_ZLIB_H
-	if(pwp->flags & PFOR_USEZLIB)
+	if (pwp->flags & PFOR_USEZLIB)
 		gzclose(pwp->dfp);
 	else
 #endif
 		fclose(pwp->dfp);
-    if(pwp->wfp)
+    if (pwp->wfp)
     {
         fclose(pwp->wfp);
     }
@@ -383,8 +384,8 @@ PutPW(pwp, string)
 
     if (string)
     {
-	strncpy(pwp->data[pwp->count], string, MAXWORDLEN);
-	pwp->data[pwp->count][MAXWORDLEN - 1] = '\0';
+	strncpy(pwp->data_put[pwp->count], string, MAXWORDLEN);
+	pwp->data_put[pwp->count][MAXWORDLEN - 1] = '\0';
 
 	pwp->hwms[string[0] & 0xff]= pwp->header.pih_numwords;
 
@@ -406,16 +407,16 @@ PutPW(pwp, string)
 
 	fwrite((char *) &datum, sizeof(datum), 1, pwp->ifp);
 
-	fputs(pwp->data[0], pwp->dfp);
+	fputs(pwp->data_put[0], pwp->dfp);
 	putc(0, pwp->dfp);
 
-	ostr = pwp->data[0];
+	ostr = pwp->data_put[0];
 
 	for (i = 1; i < NUMWORDS; i++)
 	{
 	    register int j;
 	    register char *nstr;
-	    nstr = pwp->data[i];
+	    nstr = pwp->data_put[i];
 
 	    if (nstr[0])
 	    {
@@ -428,7 +429,7 @@ PutPW(pwp, string)
 	    ostr = nstr;
 	}
 
-	memset(pwp->data, '\0', sizeof(pwp->data));
+	memset(pwp->data_put, '\0', sizeof(pwp->data_put));
 	pwp->count = 0;
     }
     return (0);
@@ -445,7 +446,6 @@ GetPW(pwp, number)
     register char *nstr;
     register char *bptr;
     char buffer[NUMWORDS * MAXWORDLEN];
-    static char data[NUMWORDS][MAXWORDLEN];
     static uint32_t prevblock = 0xffffffff;
     uint32_t thisblock;
 
@@ -454,9 +454,9 @@ GetPW(pwp, number)
     if (prevblock == thisblock)
     {
 #if DEBUG
-	fprintf(stderr, "returning (%s)\n", data[number % NUMWORDS]);
+	fprintf(stderr, "returning (%s)\n", pwp->data_get[number % NUMWORDS]);
 #endif
-	return (data[number % NUMWORDS]);
+	return (pwp->data_get[number % NUMWORDS]);
     }
 
     if (_PWIsBroken64(pwp->ifp))
@@ -465,26 +465,26 @@ GetPW(pwp, number)
        if (fseek(pwp->ifp, sizeof(struct pi_header64) + (thisblock * sizeof(uint64_t)), 0))
        {
            perror("(index fseek failed)");
-           return ((char *) 0);
+           return NULL;
        }
 
        if (!fread((char *) &datum64, sizeof(datum64), 1, pwp->ifp))
        {
            perror("(index fread failed)");
-           return ((char *) 0);
+           return NULL;
        }
        datum = datum64;
     } else {
        if (fseek(pwp->ifp, sizeof(struct pi_header) + (thisblock * sizeof(uint32_t)), 0))
        {
            perror("(index fseek failed)");
-           return ((char *) 0);
+           return NULL;
        }
 
        if (!fread((char *) &datum, sizeof(datum), 1, pwp->ifp))
        {
            perror("(index fread failed)");
-           return ((char *) 0);
+           return NULL;
        }
     }
 
@@ -493,51 +493,50 @@ GetPW(pwp, number)
 	if (pwp->flags & PFOR_USEZLIB)
 	{
 		r = gzseek(pwp->dfp, datum, 0);
-		if(r >= 0)
+		if (r >= 0)
 			r = 0;
 	}
 	else
 #endif
 		r = fseek(pwp->dfp, datum, 0);
 
-	
+
     if (r)
     {
 	perror("(data fseek failed)");
-	return ((char *) 0);
+	return NULL;
     }
 	r = 0;
-	
+
+        memset(buffer, 0, sizeof(buffer));
 #ifdef HAVE_ZLIB_H
 	if (pwp->flags & PFOR_USEZLIB)
 	{
 		r = gzread(pwp->dfp, buffer, sizeof(buffer));
-		if(r < 0)
+		if (r < 0)
 			r = 0;
 	}
 	else
 #endif
 		r = fread(buffer, 1, sizeof(buffer), pwp->dfp);
-		
-	
-	
+
     if (!r)
     {
 	perror("(data fread failed)");
-	return ((char *) 0);
+	return NULL;
     }
 
     prevblock = thisblock;
 
     bptr = buffer;
 
-    for (ostr = data[0]; (*(ostr++) = *(bptr++)); /* nothing */ );
+    for (ostr = pwp->data_get[0]; (*(ostr++) = *(bptr++)); /* nothing */ );
 
-    ostr = data[0];
+    ostr = pwp->data_get[0];
 
     for (i = 1; i < NUMWORDS; i++)
     {
-	nstr = data[i];
+	nstr = pwp->data_get[i];
 	strcpy(nstr, ostr);
 
 	ostr = nstr + *(bptr++);
@@ -546,7 +545,7 @@ GetPW(pwp, number)
 	ostr = nstr;
     }
 
-    return (data[number % NUMWORDS]);
+    return (pwp->data_get[number % NUMWORDS]);
 }
 
 unsigned int
@@ -624,7 +623,7 @@ fprintf(stderr, "look for (%s)\n", string);
 
         if (middle == hwm)
         {
-#if DEBUG 
+#if DEBUG
 		fprintf(stderr, "at terminal subdivision, stopping search\n");
 #endif
 		break;
@@ -633,11 +632,11 @@ fprintf(stderr, "look for (%s)\n", string);
 	if (cmp < 0)
 	{
 	    hwm = middle;
-	} 
+	}
 	else if (cmp > 0)
 	{
 	    lwm = middle;
-	} 
+	}
     }
 
     return (PW_WORDS(pwp));

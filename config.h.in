@@ -1,4 +1,4 @@
-/* config.h.in.  Generated from configure.in by autoheader.  */
+/* config.h.in.  Generated from configure.ac by autoheader.  */
 
 /* Define to 1 if translation of program messages to the user's native
    language is requested. */
@@ -64,7 +64,7 @@
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
 
-/* Define to 1 if you have the <zlib.h> header file. */
+/* found zlib */
 #undef HAVE_ZLIB_H
 
 /* Define to the sub-directory in which libtool stores uninstalled libraries.
@@ -97,9 +97,6 @@
 
 /* Version number of package */
 #undef VERSION
-
-/* Define to 1 if the X Window System is missing or not being used. */
-#undef X_DISPLAY_MISSING
 
 /* Define to empty if `const' does not conform to ANSI C. */
 #undef const

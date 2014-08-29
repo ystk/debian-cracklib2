@@ -43,7 +43,7 @@ static char *r_destructors[] = {
     ":",                        /* noop - must do this to test raw word. */
 
 #ifdef DEBUG2
-    (char *) 0,
+    NULL,
 #endif
 
     "[",                        /* trimming leading/trailing junk */
@@ -412,14 +412,14 @@ static char *r_destructors[] = {
     "/4s4h",
 
     /* done */
-    (char *) 0
+    NULL
 };
 
 static char *r_constructors[] = {
     ":",
 
 #ifdef DEBUG2
-    (char *) 0,
+    NULL,
 #endif
 
     "r",
@@ -428,7 +428,7 @@ static char *r_constructors[] = {
     "dr",
     "fr",
     "rf",
-    (char *) 0
+    NULL
 };
 
 int
@@ -491,89 +491,41 @@ GTry(rawtext, password)
     return (0);
 }
 
-char *
-FascistGecos(password, uid)
-    char *password;
-    int uid;
+static char *
+FascistGecosUser(char *password, const char *user, const char *gecos)
 {
     int i;
     int j;
     int wc;
     char *ptr;
     int gwords;
-    struct passwd *pwp, passwd;
     char gbuffer[STRINGSIZE];
     char tbuffer[STRINGSIZE];
-    char *sbuffer = NULL;
-#ifdef HAVE_GETPWUID_R
-    size_t sbufferlen = LINE_MAX;
-#endif
     char *uwords[STRINGSIZE];
     char longbuffer[STRINGSIZE * 2];
 
-#ifdef HAVE_GETPWUID_R
-    sbuffer = malloc(sbufferlen);
-    if (sbuffer == NULL)
-    {
-        return ("memory allocation error");
-    }
-    while ((i = getpwuid_r(uid, &passwd, sbuffer, sbufferlen, &pwp)) != 0)
-    {
-        if (i == ERANGE)
-        {
-            free(sbuffer);
-
-	    sbufferlen += LINE_MAX;
-            sbuffer = malloc(sbufferlen);
-
-            if (sbuffer == NULL)
-            {
-                return ("memory allocation error");
-            }
-        } else {
-            pwp = NULL;
-            break;
-        }
-    }
-#else
-    /* Non-reentrant, but no choice since no _r routine */
-    pwp = getpwuid(uid);
-#endif
-
-    if (pwp == NULL)
-    {
-	if (sbuffer)
-	{
-		free(sbuffer);
-		sbuffer = NULL;
-	}
-	return _("you are not registered in the password file");
-    }
+    if (gecos == NULL)
+	gecos = "";
 
     /* lets get really paranoid and assume a dangerously long gecos entry */
 
-    strncpy(tbuffer, pwp->pw_name, STRINGSIZE);
+    strncpy(tbuffer, user, STRINGSIZE);
     tbuffer[STRINGSIZE-1] = '\0';
     if (GTry(tbuffer, password))
     {
-	if (sbuffer)
-	{
-		free(sbuffer);
-		sbuffer = NULL;
-	}
 	return _("it is based on your username");
     }
 
     /* it never used to be that you got passwd strings > 1024 chars, but now... */
 
-    strncpy(tbuffer, pwp->pw_gecos, STRINGSIZE);
+    strncpy(tbuffer, gecos, STRINGSIZE);
     tbuffer[STRINGSIZE-1] = '\0';
     strcpy(gbuffer, Lowercase(tbuffer));
 
     wc = 0;
     ptr = gbuffer;
     gwords = 0;
-    uwords[0] = (char *)0;
+    uwords[0] = NULL;
 
     while (*ptr)
     {
@@ -592,11 +544,11 @@ FascistGecos(password, uid)
 
 	if (wc == STRINGSIZE)
 	{
-	    uwords[--wc] = (char *) 0;  /* to hell with it */
+	    uwords[--wc] = NULL;  /* to hell with it */
 	    break;
 	} else
 	{
-	    uwords[wc] = (char *) 0;
+	    uwords[wc] = NULL;
 	}
 
 	while (*ptr && !ISSKIP(*ptr))
@@ -621,11 +573,6 @@ FascistGecos(password, uid)
     {
 	if (GTry(uwords[i], password))
 	{
-	    if (sbuffer)
-	    {
-	    	free(sbuffer);
-		sbuffer = NULL;
-	    }
 	    return _("it is based upon your password entry");
 	}
     }
@@ -641,11 +588,6 @@ FascistGecos(password, uid)
 
 	    if (GTry(longbuffer, password))
 	    {
-	        if (sbuffer)
-	        {
-	       	    free(sbuffer);
-		    sbuffer = NULL;
-	        }
 		return _("it is derived from your password entry");
 	    }
 
@@ -654,11 +596,6 @@ FascistGecos(password, uid)
 
 	    if (GTry(longbuffer, password))
 	    {
-	        if (sbuffer)
-	        {
-	       	    free(sbuffer);
-		    sbuffer = NULL;
-	        }
 		return _("it's derived from your password entry");
 	    }
 
@@ -668,11 +605,6 @@ FascistGecos(password, uid)
 
 	    if (GTry(longbuffer, password))
 	    {
-	        if (sbuffer)
-	        {
-	       	    free(sbuffer);
-		    sbuffer = NULL;
-	        }
 		return _("it is derivable from your password entry");
 	    }
 
@@ -682,29 +614,80 @@ FascistGecos(password, uid)
 
 	    if (GTry(longbuffer, password))
 	    {
-	        if (sbuffer)
-	        {
-	       	    free(sbuffer);
-		    sbuffer = NULL;
-	        }
 		return _("it's derivable from your password entry");
 	    }
 	}
     }
 
-    if (sbuffer)
-    {
-        free(sbuffer);
-        sbuffer = NULL;
-    }
-
-    return ((char *) 0);
+    return NULL;
 }
 
 char *
-FascistLook(pwp, instring)
-    PWDICT *pwp;
-    char *instring;
+FascistGecos(password, uid)
+    char *password;
+    int uid;
+{
+    struct passwd *pwp;
+    char *sbuffer = NULL;
+    char *ptr;
+
+#ifdef HAVE_GETPWUID_R
+    size_t sbufferlen = LINE_MAX;
+    struct passwd passwd;
+    int i;
+
+    sbuffer = malloc(sbufferlen);
+    if (sbuffer == NULL)
+    {
+	return ("memory allocation error");
+    }
+    while ((i = getpwuid_r(uid, &passwd, sbuffer, sbufferlen, &pwp)) != 0)
+    {
+	if (i == ERANGE)
+	{
+	    free(sbuffer);
+
+	    sbufferlen += LINE_MAX;
+	    sbuffer = malloc(sbufferlen);
+
+	    if (sbuffer == NULL)
+	    {
+		return ("memory allocation error");
+	    }
+	} else {
+	    pwp = NULL;
+	    break;
+	}
+    }
+#else
+    /* Non-reentrant, but no choice since no _r routine */
+    pwp = getpwuid(uid);
+#endif
+
+    if (pwp == NULL)
+    {
+	if (sbuffer)
+	{
+	    free(sbuffer);
+	    sbuffer = NULL;
+	}
+	return _("you are not registered in the password file");
+    }
+
+    ptr = FascistGecosUser(password, pwp->pw_name, pwp->pw_gecos);
+
+    if (sbuffer)
+    {
+	free(sbuffer);
+	sbuffer = NULL;
+    }
+
+    return ptr;
+}
+
+static char *
+FascistLookUser(PWDICT *pwp, char *instring,
+		const char *user, const char *gecos)
 {
     int i,maxrepeat;
     char *ptr;
@@ -773,7 +756,7 @@ FascistLook(pwp, instring)
 	ptr++;
     }
 
-    /*  Change by Ben Karsin from ITS at University of Hawaii at Manoa.  Static MAXSTEP 
+    /*  Change by Ben Karsin from ITS at University of Hawaii at Manoa.  Static MAXSTEP
         would generate many false positives for long passwords. */
     maxrepeat = 3+(0.09*strlen(password));
     if (i > maxrepeat)
@@ -786,7 +769,12 @@ FascistLook(pwp, instring)
 	return _("it looks like a National Insurance number.");
     }
 
-    if ((ptr = FascistGecos(password, getuid())))
+    if (user != NULL)
+        ptr = FascistGecosUser(password, user, gecos);
+    else
+        ptr = FascistGecos(password, getuid());
+
+    if (ptr)
     {
 	return (ptr);
     }
@@ -833,13 +821,23 @@ FascistLook(pwp, instring)
 	}
     }
 
-    return ((char *) 0);
+    return NULL;
+}
+
+char *
+FascistLook(pwp, instring)
+    PWDICT *pwp;
+    char *instring;
+{
+    return FascistLookUser(pwp, instring, NULL, NULL);
 }
 
 const char *
-FascistCheck(password, path)
+FascistCheckUser(password, path, user, gecos)
     const char *password;
     const char *path;
+    const char *user;
+    const char *gecos;
 {
     PWDICT *pwp;
     char pwtrunced[STRINGSIZE];
@@ -864,19 +862,24 @@ FascistCheck(password, path)
 
     if (!(pwp = PWOpen(path, "r")))
     {
-        /* shouldn't perror in a library or exit */
-	/* but should we return a "bad password" or "good password" if this error occurs */
-	perror("PWOpen");
-	exit(-1);
+	return _("error loading dictionary");
     }
 
     /* sure seems like we should close the database, since we're only likely to check one password */
-    res = FascistLook(pwp, pwtrunced);
+    res = FascistLookUser(pwp, pwtrunced, user, gecos);
 
     PWClose(pwp);
     pwp = (PWDICT *)0;
 
     return res;
+}
+
+const char *
+FascistCheck(password, path)
+    const char *password;
+    const char *path;
+{
+    return FascistCheckUser(password, path, NULL, NULL);
 }
 
 const char *

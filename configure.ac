@@ -1,7 +1,8 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT([lib/crack.h])
-AM_INIT_AUTOMAKE(cracklib, 2.8.19)
-AM_CONFIG_HEADER(config.h)
+AC_INIT([cracklib], [2.9.1], [cracklib-devel@lists.sourceforge.net])
+AM_INIT_AUTOMAKE
+AC_CONFIG_HEADERS([config.h])
+AC_CONFIG_MACRO_DIR([m4])
 
 dnl Set of available languages.
 ALL_LINGUAS="as bn_IN cs da de el es fi fr gu hi hu it ja kn ko lt nb nl ml mr or pa pl pt_BR pt ru sl_SI sk ta te tr uk zh_CN zh_TW"
@@ -14,16 +15,23 @@ AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
 
-AC_PATH_XTRA
-
 AC_CHECK_HEADERS(unistd.h)
 AC_CHECK_HEADERS(fcntl.h)
 AC_CHECK_HEADERS(inttypes.h)
 AC_CHECK_HEADERS(stdint.h)
 AC_CHECK_HEADERS(pthread.h)
-AC_CHECK_HEADERS(zlib.h, AC_DEFINE(HAVE_ZLIB_H, [], [found zlib]))
 
-AC_SEARCH_LIBS(gzopen, z)
+AC_ARG_WITH([zlib],
+   [AS_HELP_STRING([--without-zlib], [build without zlib support @<:@default=auto@:>@])])
+AS_IF([test "$with_zlib" != "no"], [dnl
+   found_zlib=yes
+   AC_CHECK_HEADERS([zlib.h],
+      [AC_DEFINE(HAVE_ZLIB_H, [], [found zlib])],
+      [found_zlib=no])
+   AC_SEARCH_LIBS([gzopen], [z], [], [found_zlib=no])
+   AS_IF([test "$with_zlib$found_zlib" = "yesno"],
+      [AC_MSG_ERROR([zlib not found])])
+])
 
 dnl Cygwin workaround
 AC_MSG_CHECKING(if LINE_MAX is defined)
