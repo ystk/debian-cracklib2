@@ -1,10 +1,67 @@
-cracklib2 (2.8.19-3) unstable; urgency=low
+cracklib2 (2.9.1-1) unstable; urgency=medium
 
-  * update debian/patches/libcrack2-error-safer-check-variant.patch with
-    fixed version from http://bugs.debian.org/cgi-
-    bin/bugreport.cgi?bug=689588#29
+  * New upstream version
+  * refresh debian/patches/libcrack2-error-safer-check-variant.patch
+  * debian/control:
+    - bump Standards-Version to 3.9.5 (No changes)
+    - run wrap-and-sort
+  * add debian/patches/improve_test_737040.patch to check for proper behavior
+    of Python low level code
+  * Fix "python-cracklib accepts anything" by modifying
+    debian/patches/libcrack2-error-safer-check-varian.patch to perform proper
+    error message copying (Closes: #737040)
 
- -- Jan Dittberner <jandd@debian.org>  Wed, 12 Dec 2012 22:56:46 +0100
+ -- Jan Dittberner <jandd@debian.org>  Sat, 01 Feb 2014 21:11:22 +0100
+
+cracklib2 (2.9.0-2) unstable; urgency=low
+
+  [ Jan Dittberner ]
+  * Fix "Please add a udeb for early password quality checking in d-i"
+    (Closes: #658089)
+  * add udeb package stanza in debian/control
+  * bump compatibility level in debian/compat to 9
+  * debian/rules:
+    - move sequence before args in dh call
+    - copy files for libcrack2-udeb
+    - include compiled cracklib dictionary in udeb
+
+  [ Eleanor Chen ]
+  * Add "stage1" support to not build python bits during bootstrapping.
+    (Closes: #721354)
+
+  [ Martin Pitt ]
+  * debian/control: Wrap build dependencies.
+  * Add missing docbook-xml build dependency. (Closes: #724842)
+
+ -- Martin Pitt <mpitt@debian.org>  Wed, 23 Oct 2013 08:11:31 +0200
+
+cracklib2 (2.9.0-1) unstable; urgency=low
+
+  * New upstream version
+    - refresh debian/patches/libcrack2-error-safer-check-variant.patch
+    - add new FascistCheckUser to debian/libcrack2.symbols
+    - update library link in debian/libcrack2.links
+  * debian/control: use canonical VCS-* URLs
+  * Fix "Build for multiarch" (Closes: #679962)
+    - add multiarch support contributed by Iain Lane
+    - Use docbook2html instead of xmlto, for determinstic output.
+    - Fix non-SGML characters in cracklib-runtime.xml
+    - remove debian/libcrack2.links
+
+ -- Jan Dittberner <jandd@debian.org>  Mon, 12 Aug 2013 10:36:09 +0200
+
+cracklib2 (2.8.22-1) unstable; urgency=low
+
+  * New upstream version.
+  * Fix "FTBFS with Python 3.3: ImportError: No module named
+    '_cracklib'" with upstream changes (Closes: #681749)
+  * refresh debian/patches/install-debian-python-modules.patch and
+    debian/patches/libcrack2-error-safer-check-variant.patch
+  * drop debian/patches/pass-dict-to-cracklib-test.patch included in new
+    upstream version, remove line from debian/patches/series
+  * Bump Standards-Version to 3.9.4 (No changes necessary)
+
+ -- Jan Dittberner <jandd@debian.org>  Sun, 19 May 2013 11:02:35 +0200
 
 cracklib2 (2.8.19-2) unstable; urgency=low
 

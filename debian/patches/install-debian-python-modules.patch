@@ -6,7 +6,7 @@ Author: Jan Dittberner <jandd@debian.org>
      author_email="jan@dittberner.info",
      url="http://cracklib.sourceforge.net/",
      license="GPLv2+",
--    py_modules=['cracklib'],
+-    py_modules=['cracklib', 'test_cracklib'],
 +    py_modules=['cracklib', 'test_cracklib', 'crack'],
      ext_modules=extensions,
      zip_safe=False,

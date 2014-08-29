@@ -4,6 +4,7 @@ libcrack.so.2 libcrack2 #MINVER#
  Chop@Base 2.8.12
  Clone@Base 2.8.12
  FascistCheck@Base 2.8.12
+ FascistCheckUser@Base 2.9.0
  FascistGecos@Base 2.8.12
  FascistLook@Base 2.8.12
  FindPW@Base 2.8.12

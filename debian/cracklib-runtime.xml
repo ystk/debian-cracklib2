@@ -75,7 +75,7 @@
         <title>cracklib-format</title>
         <para><application>cracklib-format</application> takes a list
         of text files each containing a list of words, one per line,
-        It lowercases all words, removes control charac‐ters, and
+        It lowercases all words, removes control characters, and
         sorts the lists. It outputs the cleaned up list to standard
         output.
         </para>
@@ -119,7 +119,7 @@
       <title><package>cracklib2</package>'s test utility
       <application>cracklib-check.</application></title>
       <para><application>cracklib-check</application> takes a list of
-      passwords from stdin and checks them via libcrack2’s <ulink
+      passwords from stdin and checks them via libcrack2's <ulink
       url="/cgi-bin/man/man2html/FascistCheck+3">FascistCheck</ulink>
       sub routine.</para>
       <para><application>cracklib-check</application> prints each

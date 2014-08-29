@@ -3,18 +3,29 @@ Section: libs
 Priority: optional
 Maintainer: Jan Dittberner <jandd@debian.org>
 Uploaders: Martin Pitt <mpitt@debian.org>
-Standards-Version: 3.9.3
-Build-Depends: debhelper (>= 7.0.50), python-all-dev (>= 2.6.6-3~),
- python3-all-dev (>= 3.1.3-2~), chrpath, xmlto, automake (>= 1.10),
- autoconf (>=2.61), libtool, python-setuptools, python3-setuptools,
- dpkg-dev (>= 1.16.1~), autotools-dev
+Standards-Version: 3.9.5
+Build-Depends: autoconf (>=2.61),
+               automake (>= 1.10),
+               autotools-dev,
+               chrpath,
+               debhelper (>= 9),
+               docbook-utils,
+               docbook-xml,
+               dpkg-dev (>= 1.16.1~),
+               libtool,
+               python-all-dev (>= 2.6.6-3~),
+               python-setuptools,
+               python3-all-dev (>= 3.1.3-2~),
+               python3-setuptools
 Homepage: http://sourceforge.net/projects/cracklib
-Vcs-Git: git://git.debian.org/pkg-cracklib/pkg-cracklib.git
-Vcs-Browser: http://git.debian.org/?p=pkg-cracklib/pkg-cracklib.git
+Vcs-Git: git://anonscm.debian.org/pkg-cracklib/pkg-cracklib.git
+Vcs-Browser: http://anonscm.debian.org/gitweb/?p=pkg-cracklib/pkg-cracklib.git
 
 Package: libcrack2
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Multi-Arch: same
+Pre-Depends: ${misc:Pre-Depends}
+Depends: ${misc:Depends}, ${shlibs:Depends}
 Recommends: cracklib-runtime
 Description: pro-active password checker library
  Shared library for cracklib2 which contains a C function which may be
@@ -22,6 +33,20 @@ Description: pro-active password checker library
  users from choosing passwords that could be guessed by crack by
  filtering them out, at source. cracklib2 is NOT a replacement passwd
  program. cracklib2 is a LIBRARY.
+
+Package: libcrack2-udeb
+Package-Type: udeb
+Section: debian-installer
+Architecture: any
+Pre-Depends: ${misc:Pre-Depends}
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Description: pro-active password checker library
+ Shared library for cracklib2 which contains a C function which may be
+ used in a passwd like program. The idea is simple: try to prevent
+ users from choosing passwords that could be guessed by crack by
+ filtering them out, at source.
+ .
+ This is an udeb package that can be used by the Debian installer.
 
 Package: libcrack2-dev
 Section: libdevel
@@ -40,8 +65,12 @@ Description: pro-active password checker library - development files
 Package: cracklib-runtime
 Section: admin
 Architecture: any
-Depends: ${shlibs:Depends}, libcrack2 (>=${binary:Version}), file,
- ${misc:Depends}
+Multi-Arch: foreign
+Pre-Depends: ${misc:Pre-Depends}
+Depends: file,
+         libcrack2 (>=${binary:Version}),
+         ${misc:Depends},
+         ${shlibs:Depends}
 Recommends: wamerican | wordlist
 Description: runtime support for password checker library cracklib2
  Run-time support programs which use the shared library in libcrack2
@@ -51,9 +80,12 @@ Description: runtime support for password checker library cracklib2
 Package: python-cracklib
 Section: python
 Architecture: any
-Depends: ${python:Depends}, ${shlibs:Depends}, ${misc:Depends},
- libcrack2 (>=${binary:Version}), cracklib-runtime
- (>=${binary:Version})
+Depends: cracklib-runtime
+ (>=${binary:Version}),
+         libcrack2 (>=${binary:Version}),
+         ${misc:Depends},
+         ${python:Depends},
+         ${shlibs:Depends}
 Provides: ${python:Provides}
 Conflicts: python-crack
 Description: Python bindings for password checker library cracklib2
@@ -67,9 +99,12 @@ Description: Python bindings for password checker library cracklib2
 Package: python3-cracklib
 Section: python
 Architecture: any
-Depends: ${python3:Depends}, ${shlibs:Depends}, ${misc:Depends},
- libcrack2 (>=${binary:Version}), cracklib-runtime
- (>=${binary:Version})
+Depends: cracklib-runtime
+ (>=${binary:Version}),
+         libcrack2 (>=${binary:Version}),
+         ${misc:Depends},
+         ${python3:Depends},
+         ${shlibs:Depends}
 Provides: ${python3:Provides}
 Description: Python3 bindings for password checker library cracklib2
  This package provides Python bindings for cracklib. It contains a
