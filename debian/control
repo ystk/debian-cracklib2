@@ -3,7 +3,7 @@ Section: libs
 Priority: optional
 Maintainer: Jan Dittberner <jandd@debian.org>
 Uploaders: Martin Pitt <mpitt@debian.org>
-Standards-Version: 3.9.5
+Standards-Version: 3.9.6
 Build-Depends: autoconf (>=2.61),
                automake (>= 1.10),
                autotools-dev,

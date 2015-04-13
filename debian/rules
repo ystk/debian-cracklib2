@@ -43,15 +43,11 @@ override_dh_auto_configure:
 override_dh_auto_build:
 	$(MAKE) -C $(CURDIR)/debian/buildtmp/base
 ifneq ($(DEB_STAGE),stage1)
+	ln -s $(CURDIR)/debian/crack.py $(CURDIR)/python; \
 	for i in $(PYVERS) $(PY3VERS); do \
 		cd $(CURDIR)/debian/buildtmp/python$$i; \
 		rm -rf lib; ln -s $(CURDIR)/debian/buildtmp/base/lib lib; \
 		cd python; \
-		ln -s $(CURDIR)/python/*.py \
-		      $(CURDIR)/python/*.c \
-		      $(CURDIR)/debian/test_cracklib.py \
-		      $(CURDIR)/debian/crack.py \
-		      . ; \
 		CFLAGS="-I$(CURDIR)/lib $(CFLAGS)" LDFLAGS="$(LDFLAGS)" CPPFLAGS="$(CPPFLAGS)" python$$i setup.py build ; \
 	done
 endif
@@ -80,7 +76,9 @@ override_dh_auto_clean:
 	 dicts/Makefile.in doc/Makefile.in lib/Makefile.in m4/Makefile.in	\
 	 py-compile python/Makefile.in util/Makefile.in ltmain.sh		\
 	 m4/ltoptions.m4 m4/ltversion.m4 m4/libtool.m4 m4/ltsugar.m4		\
-	 m4/lt~obsolete.m4
+	 m4/lt~obsolete.m4 compile
+	# remove files created or changed by build
+	rm -rf python/crack.py python/cracklib.egg-info
 	dh_auto_clean
 
 override_dh_auto_install:

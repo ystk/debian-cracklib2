@@ -1,3 +1,19 @@
+cracklib2 (2.9.2-1) unstable; urgency=medium
+
+  * New upstream version (Closes: #724570)
+  * refresh debian/patches/install-debian-python-modules.patch
+  * bump Standards-Version to 3.9.6 (No changes)
+  * upstream supports out of tree builds, simplify debian/rules
+    override_dh_auto_build and override_dh_auto_clean
+  * remove debian/test_cracklib.py that is now included as
+    python/test_cracklib.py
+  * remove compile and python/cracklib.egg-info in debian/rules
+    override_dh_auto_clean to avoid unintended upstream changes
+  * add README-DAWG and README-LICENSE to debian/libcrack2.docs
+  * change debian/copyright to machine readable format
+
+ -- Jan Dittberner <jandd@debian.org>  Sun, 05 Oct 2014 23:48:30 +0200
+
 cracklib2 (2.9.1-1) unstable; urgency=medium
 
   * New upstream version
