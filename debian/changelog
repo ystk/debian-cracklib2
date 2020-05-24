@@ -1,3 +1,12 @@
+cracklib2 (2.9.2-1+deb8u1) jessie-security; urgency=high
+
+  * Non-maintainer upload by the LTS Team. 
+  * CVE-2016-6318
+    Stack-based buffer overflow when parsing large GECOS field
+    (patch by Salvatore Bonaccorso)
+ 
+ -- Thorsten Alteholz <debian@alteholz.de>  Sun, 24 May 2020 16:03:02 +0200
+
 cracklib2 (2.9.2-1) unstable; urgency=medium
 
   * New upstream version (Closes: #724570)
